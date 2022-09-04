@@ -89,6 +89,10 @@ event.on_player_joined_game(
         local player = game.get_player(e.player_index)
         Gui.close(player)
 
+        if not global.players[player.name] then
+            player_data.init(player)
+        end
+
         local player_table = global.players[player.name]
         if player_table.flags.translate_on_join then
             player_table.flags.translate_on_join = false
