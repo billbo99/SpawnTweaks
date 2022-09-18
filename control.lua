@@ -9,7 +9,6 @@ local constants = require("constants")
 
 -- local constants = require("constants")
 local global_data = require("scripts.global-data")
-local migrations = require("scripts.migrations")
 local on_tick = require("scripts.on-tick")
 local player_data = require("scripts.player-data")
 
@@ -59,16 +58,6 @@ event.on_configuration_changed(
     function(e)
         DB.OnConfigurationChanged(e)
         global_data.OnConfigurationChanged(e)
-        if migration.on_config_changed(e, migrations) then
-            translation.init()
-            on_tick.register()
-
-            for _, player in pairs(game.players) do
-                player_data.refresh(player, global.players[player.name])
-            end
-        elseif e.mod_changes["SpawnTweaks"] then
-            --maybe do something
-        end
     end
 )
 

@@ -93,19 +93,24 @@ function player_data.GiveGear(player)
             player.insert { name = global.players[name]['armor'], count = 1 }
         end
         if global.players[name]['gun'] and global.players[name]['gun']['Primary'] and global.players[name]['gun']['Primary'] ~= "None" then
-            player.insert { name = global.players[name]['gun']['Primary'], count = 1 }
+            local item = global.players[name]['gun']['Primary']
+            player.insert { name = item, count = global.gear["gun"][item].quantity or 1 }
         end
         if global.players[name]['ammo'] and global.players[name]['ammo']['Primary'] and global.players[name]['ammo']['Primary'] ~= "None" then
-            player.insert { name = global.players[name]['ammo']['Primary'], count = settings.global["SpawnTweaks-ammo_starting_amount"].value }
+            local item = global.players[name]['ammo']['Primary']
+            player.insert { name = item, count = global.gear["ammo"][item].quantity or 1 }
         end
         if global.players[name]['gun'] and global.players[name]['gun']['Secondary'] and global.players[name]['gun']['Secondary'] ~= "None" then
-            player.insert { name = global.players[name]['gun']['Secondary'], count = 1 }
+            local item = global.players[name]['gun']['Secondary']
+            player.insert { name = item, count = global.gear["gun"][item].quantity or 1 }
         end
         if global.players[name]['ammo'] and global.players[name]['ammo']['Secondary'] and global.players[name]['ammo']['Secondary'] ~= "None" then
-            player.insert { name = global.players[name]['ammo']['Secondary'], count = settings.global["SpawnTweaks-ammo_starting_amount"].value }
+            local item = global.players[name]['ammo']['Secondary']
+            player.insert { name = item, count = global.gear["ammo"][item].quantity or 1 }
         end
         if global.players[name]['capsule'] and global.players[name]['capsule'] ~= "None" then
-            player.insert { name = global.players[name]['capsule'], count = settings.global["SpawnTweaks-capsule_starting_amount"].value }
+            local item = global.players[name]['capsule']
+            player.insert { name = item, count = global.gear["capsule"][item].quantity or 1 }
         end
     end
 
