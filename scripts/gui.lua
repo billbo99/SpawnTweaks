@@ -12,7 +12,7 @@ function Gui.GenerateCaption(player, item, item_type)
 
     local game_recipes = game.get_filtered_recipe_prototypes({ { filter = "has-product-item", elem_filters = { { filter = "name", name = item } } } })
     -- for _, recipe in pairs(game_recipes) do
-    local item_translation = global.players[player.name].translations.item[item]
+    local item_translation = global.locale_dictionaries.item[item]
     if global.gear[item_type] and global.gear[item_type][item] then
         cost = global.gear[item_type][item].cost
     elseif global.gear["capsule"] and global.gear["capsule"][item] then
@@ -422,7 +422,8 @@ function Gui.OnGuiEvent(e)
     local element_name = e.element.name
     local method = Func.Split(element_name, ":")[1]
 
-    -- game.print("DEBUG - " .. element_name)
+    if global.gui_locked then return end
+
     if Gui.events[method] then
         Gui.events[method](e)
     end

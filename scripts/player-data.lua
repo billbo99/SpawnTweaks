@@ -1,11 +1,4 @@
-local translation = require("__flib__.translation")
-
--- local main_gui = require("scripts.gui.main.base")
-local Gui = require("scripts.gui")
 local Func = require("scripts.func")
-local constants = require("constants")
-local util = require("__core__.lualib.util")
-local on_tick = require("scripts.on-tick")
 
 local player_data = {}
 
@@ -24,43 +17,8 @@ function player_data.init(player)
         gui = {},
         settings = {},
         frames = {},
-        translations = util.table.deepcopy(constants.empty_translation_table)
     }
     global.players[player.name] = data
-
-    player_data.refresh(player, global.players[player.name])
-end
-
-function player_data.update_settings(player, player_table)
-    local mod_settings = player.mod_settings
-    local settings = {}
-    player_table.settings = settings
-end
-
-function player_data.start_translations(player_index)
-    translation.add_requests(player_index, global.strings)
-    on_tick.register()
-end
-
-function player_data.refresh(player, player_table)
-    -- close GUI
-    Gui.close(player)
-
-    -- set flags
-    player_table.flags.can_open_gui = false
-
-    -- update settings
-    player_data.update_settings(player, player_table)
-
-    -- run translations
-    player_table.translations = util.table.deepcopy(constants.empty_translation_table)
-    if player.connected then
-        player_data.start_translations(player.index)
-    else
-        player_table.flags.translate_on_join = true
-    end
-
-    player_data.update_settings(player, player_table)
 end
 
 function player_data.ClearPlayerInventories(player)

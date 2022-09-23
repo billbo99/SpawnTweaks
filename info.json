@@ -1,6 +1,6 @@
 {
     "name": "SpawnTweaks",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "title": "Spawn Tweaks",
     "author": "billbo99",
     "contact": "",
@@ -8,7 +8,7 @@
     "factorio_version": "1.1",
     "dependencies": [
         "base >= 1.0.0",
-        "flib"
+        "Babelfish"
     ],
     "description": "Tweaks to re-spawning get given; ammo / guns / armor if you have made enough already.  Also allow changing corpse decay timing for players / biters since they are also death related."
 }

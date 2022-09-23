@@ -75,6 +75,7 @@ end
 function global_data.init()
     global_data.parse_technologies()
     global_data.parse_gear("init")
+    global.gui_locked = true
     global.flags = {}
     global.players = {}
 end
