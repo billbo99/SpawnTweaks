@@ -54,6 +54,7 @@ local function OnPlayerCreated(event)
         player_data.init(player)
         player.print(settings.global["SpawnTweaks-welcome"].value, global.print_colour)
         player_data.GiveGear(player)
+        Gui.create(player)
     end
 end
 
@@ -61,7 +62,7 @@ end
 local function OnPlayerJoinedGame(event)
     local player = game.get_player(event.player_index)
     if player then
-        Gui.close(player)
+        Gui.create(player)
         if not global.players[player.name] then
             player_data.init(player)
         end

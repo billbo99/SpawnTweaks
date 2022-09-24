@@ -376,12 +376,8 @@ function Gui.SpawnTweaksMainToggle(e)
 end
 
 function Gui.DestroyGui(player)
-    local gui_top = player.gui.top["SpawnTweaksIcon"]
     local gui_main = player.gui.screen["SpawnTweaksMain"]
 
-    if gui_top ~= nil then
-        gui_top.destroy()
-    end
     if gui_main ~= nil then
         gui_main.destroy()
     end
@@ -413,7 +409,11 @@ end
 
 function Gui.create(player)
     Gui.DestroyGui(player)
-    Gui.CreateTopGui(player)
+
+    local gui_button = player.gui.screen["SpawnTweaksMainButton"]
+    if not gui_button then
+        Gui.CreateTopGui(player)
+    end
 end
 
 function Gui.OnGuiEvent(e)
