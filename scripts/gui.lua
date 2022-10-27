@@ -432,15 +432,21 @@ end
 function Gui.CreateAdminTab(frame, item_data)
     local player = game.get_player(frame.player_index)
 
-    local frame1 = frame.add({ type = "frame", style = "inside_shallow_frame_with_padding", direction = "vertical" })
-    frame1.style.horizontally_stretchable = true
-    frame1.style.vertically_stretchable = true
-    frame1.style.minimal_width = 200
+    local frame0 = frame.add({ type = "frame", style = "inside_shallow_frame_with_padding", direction = "vertical" })
+    frame0.style.horizontally_stretchable = "on"
+    frame0.style.vertically_stretchable = true
+    frame0.style.minimal_width = 300
+    frame0.style.minimal_height = 400
+    local frame1 = frame0.add({ type = "scroll-pane", style = "naked_scroll_pane", direction = "vertical" })
+    frame1.style.horizontally_stretchable = "on"
+    frame1.style.vertically_stretchable = "on"
+    frame1.style.minimal_width = 300
 
     local column_count = 3
     if item_data == "Ammo" or item_data == "Capsule" then column_count = 4 end
 
     local flow = frame1.add({ type = "table", column_count = column_count })
+    flow.style.vertically_stretchable = "on"
 
     if item_data == "Ammo" or item_data == "Capsule" then flow.add({ type = "label", caption = "Qty" }) end
     flow.add({ type = "label", caption = "Cost" })
