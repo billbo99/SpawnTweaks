@@ -213,8 +213,13 @@ function Gui.CreateGunFrame(frame, tag, alt)
                     local key = ""
                     if v.subgroup and v.subgroup.name then key = key .. v.subgroup.name end
                     if v.order then key = key .. v.order end
+                    key = key .. k
                     if postfix then caption = caption .. " " .. postfix end
-                    elements[key] = { name = "Picked" .. tag .. "Gun:" .. k, type = "radiobutton", state = state, caption = caption, enabled = flag }
+                    if elements[key] then
+                        print("dup")
+                    else
+                        elements[key] = { name = "Picked" .. tag .. "Gun:" .. k, type = "radiobutton", state = state, caption = caption, enabled = flag }
+                    end
                 end
             end
         end
