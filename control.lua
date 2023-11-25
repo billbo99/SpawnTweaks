@@ -16,10 +16,10 @@ local function RegisterEvents()
 end
 
 local function OnInit()
-    if remote.interfaces["freeplay"] == nil then
-        return
-    end
-    remote.call("freeplay", "set_skip_intro", true)
+    -- if remote.interfaces["freeplay"] == nil then
+    --     return
+    -- end
+    -- remote.call("freeplay", "set_skip_intro", true)
 
     RegisterEvents()
     global_data.init()

@@ -3,22 +3,24 @@ local Func = require("scripts.func")
 local player_data = {}
 
 function player_data.init(player)
-    local data = {
-        flags = {
-            can_open_gui = false,
-            gui_open = false,
-            show_message_after_translation = true,
-            translate_on_join = true
-        },
-        gun = { Primary = "pistol", Secondary = "None" },
-        ammo = { Primary = "firearm-magazine", Secondary = "None" },
-        capsule = "None",
-        armor = "None",
-        gui = {},
-        settings = {},
-        frames = {},
-    }
-    global.players[player.name] = data
+    if player then
+        local data = {
+            flags = {
+                can_open_gui = false,
+                gui_open = false,
+                show_message_after_translation = true,
+                translate_on_join = true
+            },
+            gun = { Primary = "pistol", Secondary = "None" },
+            ammo = { Primary = "firearm-magazine", Secondary = "None" },
+            capsule = "None",
+            armor = "None",
+            gui = {},
+            settings = {},
+            frames = {},
+        }
+        global.players[player.name] = data
+    end
 end
 
 function player_data.validate(player)
