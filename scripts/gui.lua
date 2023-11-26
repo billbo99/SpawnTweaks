@@ -248,6 +248,11 @@ function Gui.CreateData(player, item_type)
     local elements = {}
     -- local items = game.get_filtered_item_prototypes({ { filter = "type", type = item_type:lower() } })
     for k, v in pairs(global.gear[item_type:lower()]) do
+        if global.players[player.name][item_type:lower()] == v.prototype.name then
+            state = true
+        else
+            state = false
+        end
         if v.prototype and v.prototype.flags and v.prototype.flags.hidden then
             -- skip
         else
@@ -255,11 +260,6 @@ function Gui.CreateData(player, item_type)
             local force_recipes = player.force.recipes
             if #game_recipes > 0 then
                 for _, recipe in pairs(game_recipes) do
-                    if global.players[player.name][item_type:lower()] == v.prototype.name then
-                        state = true
-                    else
-                        state = false
-                    end
                     local flag, cost, caption, postfix = Gui.GenerateCaption(player, v.prototype.name, v.prototype.type)
                     local key = ""
                     if v.prototype.subgroup and v.prototype.subgroup.name then key = key .. v.prototype.subgroup.name end
@@ -283,7 +283,7 @@ function Gui.CreateRadioButtonList(frame, item_type)
     local state = false
     local player = game.get_player(frame.player_index)
 
-    if global.players[player.name].capsule == "None" then
+    if global.players[player.name][item_type] == "None" then
         state = true
     end
     frame.add { name = "Picked:" .. item_type .. ":None", type = "radiobutton", state = state, caption = "None", enabled = true }
@@ -327,13 +327,13 @@ function Gui.CreateMisc(frame)
     frame1.style.horizontally_stretchable = true
     frame1.style.vertically_stretchable = true
     frame1.style.minimal_width = 200
-    Gui.CreateRadioButtonList(frame1, "Armor")
+    Gui.CreateRadioButtonList(frame1, "armor")
 
     local frame2 = frame.add({ type = "frame", style = "inside_shallow_frame_with_padding", caption = "Capsule", name = "capsule", direction = "vertical" })
     frame2.style.horizontally_stretchable = true
     frame2.style.vertically_stretchable = true
     frame2.style.minimal_width = 200
-    Gui.CreateRadioButtonList(frame2, "Capsule")
+    Gui.CreateRadioButtonList(frame2, "capsule")
 end
 
 function Gui.CreateSpawnTweaksMain(player)
