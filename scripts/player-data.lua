@@ -19,42 +19,42 @@ function player_data.init(player)
             settings = {},
             frames = {},
         }
-        global.players[player.name] = data
+        storage.players[player.name] = data
     end
 end
 
 function player_data.validate(player)
-    if global.players[player.name] then
-        global.players[player.name].flags.can_open_gui = false
-        global.players[player.name].flags.gui_open = false
-        global.players[player.name].flags.show_message_after_translation = true
-        global.players[player.name].flags.translate_on_join = true
-        -- global.players[player.name].gui = {}
-        -- global.players[player.name].settings = {}
-        -- global.players[player.name].frames = {}
+    if storage.players[player.name] then
+        storage.players[player.name].flags.can_open_gui = false
+        storage.players[player.name].flags.gui_open = false
+        storage.players[player.name].flags.show_message_after_translation = true
+        storage.players[player.name].flags.translate_on_join = true
+        -- storage.players[player.name].gui = {}
+        -- storage.players[player.name].settings = {}
+        -- storage.players[player.name].frames = {}
 
-        if global.players[player.name].gun.Primary and not global.gear.gun[global.players[player.name].gun.Primary] then
-            global.players[player.name].gun.Primary = "pistol"
+        if storage.players[player.name].gun.Primary and not storage.gear.gun[storage.players[player.name].gun.Primary] then
+            storage.players[player.name].gun.Primary = "pistol"
         end
 
-        if global.players[player.name].gun.Secondary and not global.gear.gun[global.players[player.name].gun.Secondary] then
-            global.players[player.name].gun.Secondary = "None"
+        if storage.players[player.name].gun.Secondary and not storage.gear.gun[storage.players[player.name].gun.Secondary] then
+            storage.players[player.name].gun.Secondary = "None"
         end
 
-        if global.players[player.name].ammo.Primary and not global.gear.ammo[global.players[player.name].ammo.Primary] then
-            global.players[player.name].ammo.Primary = "firearm-magazine"
+        if storage.players[player.name].ammo.Primary and not storage.gear.ammo[storage.players[player.name].ammo.Primary] then
+            storage.players[player.name].ammo.Primary = "firearm-magazine"
         end
 
-        if global.players[player.name].ammo.Secondary and not global.gear.ammo[global.players[player.name].ammo.Secondary] then
-            global.players[player.name].ammo.Secondary = "None"
+        if storage.players[player.name].ammo.Secondary and not storage.gear.ammo[storage.players[player.name].ammo.Secondary] then
+            storage.players[player.name].ammo.Secondary = "None"
         end
 
-        if global.players[player.name].capsule and not global.gear.capsule[global.players[player.name].capsule] then
-            global.players[player.name].capsule = "None"
+        if storage.players[player.name].capsule and not storage.gear.capsule[storage.players[player.name].capsule] then
+            storage.players[player.name].capsule = "None"
         end
 
-        if global.players[player.name].armor and not global.gear.armor[global.players[player.name].armor] then
-            global.players[player.name].armor = "None"
+        if storage.players[player.name].armor and not storage.gear.armor[storage.players[player.name].armor] then
+            storage.players[player.name].armor = "None"
         end
         -- else
         --     player_data.init(player)
@@ -84,7 +84,7 @@ function player_data.GiveExtraGear(player)
         local items = Func.Split(settings.global["SpawnTweaks-extra-respawn-gear"].value, " +")
         for _, item in pairs(items) do
             local parts = Func.Split(item, ":")
-            if game.item_prototypes[parts[1]] and type(tonumber(parts[2])) == "number" then
+            if prototypes.item[parts[1]] and type(tonumber(parts[2])) == "number" then
                 player.insert { name = parts[1], count = tonumber(parts[2]) }
             end
         end
@@ -95,29 +95,29 @@ function player_data.GiveGear(player)
     local name = player.name
     player_data.ClearPlayerInventories(player)
 
-    if global.players[name] then
-        if global.players[name]['armor'] and global.players[name]['armor'] ~= "None" then
-            player.insert { name = global.players[name]['armor'], count = 1 }
+    if storage.players[name] then
+        if storage.players[name]['armor'] and storage.players[name]['armor'] ~= "None" then
+            player.insert { name = storage.players[name]['armor'], count = 1 }
         end
-        if global.players[name]['gun'] and global.players[name]['gun']['Primary'] and global.players[name]['gun']['Primary'] ~= "None" then
-            local item = global.players[name]['gun']['Primary']
-            player.insert { name = item, count = global.gear["gun"][item].quantity or 1 }
+        if storage.players[name]['gun'] and storage.players[name]['gun']['Primary'] and storage.players[name]['gun']['Primary'] ~= "None" then
+            local item = storage.players[name]['gun']['Primary']
+            player.insert { name = item, count = storage.gear["gun"][item].quantity or 1 }
         end
-        if global.players[name]['ammo'] and global.players[name]['ammo']['Primary'] and global.players[name]['ammo']['Primary'] ~= "None" then
-            local item = global.players[name]['ammo']['Primary']
-            player.insert { name = item, count = global.gear["ammo"][item].quantity or 1 }
+        if storage.players[name]['ammo'] and storage.players[name]['ammo']['Primary'] and storage.players[name]['ammo']['Primary'] ~= "None" then
+            local item = storage.players[name]['ammo']['Primary']
+            player.insert { name = item, count = storage.gear["ammo"][item].quantity or 1 }
         end
-        if global.players[name]['gun'] and global.players[name]['gun']['Secondary'] and global.players[name]['gun']['Secondary'] ~= "None" then
-            local item = global.players[name]['gun']['Secondary']
-            player.insert { name = item, count = global.gear["gun"][item].quantity or 1 }
+        if storage.players[name]['gun'] and storage.players[name]['gun']['Secondary'] and storage.players[name]['gun']['Secondary'] ~= "None" then
+            local item = storage.players[name]['gun']['Secondary']
+            player.insert { name = item, count = storage.gear["gun"][item].quantity or 1 }
         end
-        if global.players[name]['ammo'] and global.players[name]['ammo']['Secondary'] and global.players[name]['ammo']['Secondary'] ~= "None" then
-            local item = global.players[name]['ammo']['Secondary']
-            player.insert { name = item, count = global.gear["ammo"][item].quantity or 1 }
+        if storage.players[name]['ammo'] and storage.players[name]['ammo']['Secondary'] and storage.players[name]['ammo']['Secondary'] ~= "None" then
+            local item = storage.players[name]['ammo']['Secondary']
+            player.insert { name = item, count = storage.gear["ammo"][item].quantity or 1 }
         end
-        if global.players[name]['capsule'] and global.players[name]['capsule'] ~= "None" then
-            local item = global.players[name]['capsule']
-            player.insert { name = item, count = global.gear["capsule"][item].quantity or 1 }
+        if storage.players[name]['capsule'] and storage.players[name]['capsule'] ~= "None" then
+            local item = storage.players[name]['capsule']
+            player.insert { name = item, count = storage.gear["capsule"][item].quantity or 1 }
         end
     end
 

@@ -38,11 +38,11 @@ local function build_strings()
             -- `dictionary` - the dictionary (subtable) that the string belongs to
             -- `internal` - a string that the translation will be keyed by, e.g. "iron-plate"
             -- `localised` - the actual localised string that needs to be translated
-            strings[i] = {dictionary = category, internal = name, localised = prototype.localised_name}
+            strings[i] = { dictionary = category, internal = name, localised = prototype.localised_name }
         end
     end
     -- save to global
-    global.strings = strings
+    storage.strings = strings
 end
 
 -- conditionally registered `on_tick` handler
@@ -66,7 +66,7 @@ end
 
 -- create player data
 local function init_player(player_index)
-    global.players[player_index] = {
+    storage.players[player_index] = {
         flags = {
             -- if true, start translations for the player when they join
             -- players must be online in order for translations to be processed
@@ -79,7 +79,7 @@ end
 
 local function start_translations(player_index)
     -- add_requests - adds the StringData array to the player's table and starts translation
-    translation.add_requests(player_index, global.strings)
+    translation.add_requests(player_index, storage.strings)
     -- register the `on_tick` handler
     register_on_tick()
 end
@@ -93,7 +93,7 @@ event.on_init(
         build_strings()
 
         -- create player data
-        global.players = {}
+        storage.players = {}
         for i, player in pairs(game.players) do
             init_player(i)
 
@@ -102,7 +102,7 @@ event.on_init(
             if player.connected then
                 start_translations(i)
             else
-                global.players[i].flags.translate_on_join = true
+                storage.players[i].flags.translate_on_join = true
             end
         end
     end
@@ -130,7 +130,7 @@ event.on_configuration_changed(
             for i, player in pairs(game.players) do
                 -- the player is guaranteed to not be translating anymore, since we did a complete module reset
 
-                local player_table = global.players[e.player_index]
+                local player_table = storage.players[e.player_index]
 
                 -- reset the translate_on_join flag
                 player_table.flags.translate_on_join = false
@@ -141,7 +141,7 @@ event.on_configuration_changed(
                 if player.connected then
                     start_translations(i)
                 else
-                    global.players[i].flags.translate_on_join = true
+                    storage.players[i].flags.translate_on_join = true
                 end
             end
         end
@@ -155,7 +155,7 @@ event.on_string_translated(
 
         -- `sort_data` can be `nil` if another mod requested translations as well, so check for it
         if sort_data then
-            local player_table = global.players[e.player_index]
+            local player_table = storage.players[e.player_index]
             local translations = player_table.translations
             -- iterate the ResultSortData
             for dictionary_name, internal_names in pairs(sort_data) do
@@ -191,7 +191,7 @@ event.on_player_created(
 
 event.on_player_joined_game(
     function(e)
-        local player_flags = global.players[e.player_index].flags
+        local player_flags = storage.players[e.player_index].flags
         -- if the translate_on_join flag is set
         if player_flags.translate_on_join then
             -- unset the flag so this only happens once
@@ -209,7 +209,7 @@ event.on_player_left_game(
             -- cancel the translations
             translation.cancel(e.player_index)
             -- reset the player's translation tables
-            local player_table = global.players[e.player_index]
+            local player_table = storage.players[e.player_index]
             player_table.translations = table.shallow_copy(empty_translation_tables)
             -- re-set the flag so the translations will restart when they re-join
             player_table.flags.translate_on_join = true
@@ -225,6 +225,6 @@ event.on_player_removed(
             translation.cancel(e.player_index)
         end
         -- destroy the player's data
-        global.players[e.player_index] = nil
+        storage.players[e.player_index] = nil
     end
 )

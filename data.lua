@@ -47,7 +47,7 @@ data:extend(
         {
             type = "sprite",
             name = "close_sprite",
-            filename = "__core__/graphics/icons/close-white.png",
+            filename = "__core__/graphics/icons/close.png",
             width = 32,
             height = 32
         }

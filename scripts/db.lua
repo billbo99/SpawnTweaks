@@ -1,30 +1,30 @@
 local DB = {}
 
 function DB.ParseAmmoByCategory()
-    global.AmmoByCategory = global.AmmoByCategory or {}
-    for name, _ in pairs(game.ammo_category_prototypes) do
-        global.AmmoByCategory[name] = {}
+    storage.AmmoByCategory = storage.AmmoByCategory or {}
+    for name, _ in pairs(prototypes.ammo_category) do
+        storage.AmmoByCategory[name] = {}
     end
 
-    for name, data in pairs(game.get_filtered_item_prototypes({ { filter = "type", type = "ammo" } })) do
+    for name, data in pairs(prototypes.get_item_filtered({ { filter = "type", type = "ammo" } })) do
         if data.get_ammo_type() then
             local record = { name = name, proto = data }
-            local key = data.get_ammo_type().category
-            table.insert(global.AmmoByCategory[key], record)
+            local key = data.ammo_category.name
+            table.insert(storage.AmmoByCategory[key], record)
         end
     end
 
-    for name, data in pairs(game.get_filtered_item_prototypes({ { filter = "type", type = "capsule" } })) do
+    for name, data in pairs(prototypes.get_item_filtered({ { filter = "type", type = "capsule" } })) do
         if data.capsule_action and data.capsule_action.attack_parameters and data.capsule_action.attack_parameters.ammo_type then
             local record = { name = name, proto = data }
-            local key = data.capsule_action.attack_parameters.ammo_type.category
-            table.insert(global.AmmoByCategory[key], record)
+            local key = data.capsule_action.attack_parameters.ammo_categories[1]
+            table.insert(storage.AmmoByCategory[key], record)
         end
     end
 end
 
 function DB.CreateGlobals()
-    global.print_colour = { r = 255, g = 255, b = 0 }
+    storage.print_colour = { r = 255, g = 255, b = 0 }
     DB.ParseAmmoByCategory()
 end
 

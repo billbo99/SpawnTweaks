@@ -8,15 +8,25 @@ function Gui.GenerateCaption(player, item, item_type)
     local caption
     local postfix = ""
     local force = player.force
-    local produced = force["item_production_statistics"].input_counts
+    local produced = {}
+    for _, surface in pairs(game.surfaces) do
+        for i, count in pairs(force.get_item_production_statistics(surface.name).input_counts) do
+            if not produced[i] then
+                produced[i] = 0
+            end
+            produced[i] = produced[i] + count
+        end
+    end
+    -- local produced = force.item_production_statistics["item_production_statistics"].input_counts
 
-    local game_recipes = game.get_filtered_recipe_prototypes({ { filter = "has-product-item", elem_filters = { { filter = "name", name = item } } } })
+
+    local game_recipes = prototypes.get_recipe_filtered({ { filter = "has-product-item", elem_filters = { { filter = "name", name = item } } } })
     -- for _, recipe in pairs(game_recipes) do
-    local item_translation = global.locale_dictionaries.item[item] or ""
-    if global.gear[item_type] and global.gear[item_type][item] then
-        cost = global.gear[item_type][item].cost
-    elseif global.gear["capsule"] and global.gear["capsule"][item] then
-        cost = global.gear["capsule"][item].cost
+    local item_translation = storage.locale_dictionaries.item[item] or ""
+    if storage.gear[item_type] and storage.gear[item_type][item] then
+        cost = storage.gear[item_type][item].cost
+    elseif storage.gear["capsule"] and storage.gear["capsule"][item] then
+        cost = storage.gear["capsule"][item].cost
     else
         cost = 100
     end
@@ -49,28 +59,28 @@ function Gui.Picked(e)
     local item = Func.Split(element_name, ":")[3]
     local item_type = Func.Split(element_name, ":")[2]
 
-    global.players[player.name][item_type:lower()] = item
+    storage.players[player.name][item_type:lower()] = item
 end
 
 function Gui.Quantity(e)
     local element_name = e.element.name
     local item_type = Func.Split(element_name, ":")[2]:lower()
     local item = Func.Split(element_name, ":")[3]:lower()
-    global.gear[item_type][item].quantity = tonumber(e.element.text) or 0
+    storage.gear[item_type][item].quantity = tonumber(e.element.text) or 0
 end
 
 function Gui.Cost(e)
     local element_name = e.element.name
     local item_type = Func.Split(element_name, ":")[2]:lower()
     local item = Func.Split(element_name, ":")[3]:lower()
-    global.gear[item_type][item].cost = tonumber(e.element.text) or 0
+    storage.gear[item_type][item].cost = tonumber(e.element.text) or 0
 end
 
 function Gui.Enabled(e)
     local element_name = e.element.name
     local item_type = Func.Split(element_name, ":")[2]:lower()
     local item = Func.Split(element_name, ":")[3]:lower()
-    global.gear[item_type][item].enabled = e.element.state
+    storage.gear[item_type][item].enabled = e.element.state
 end
 
 function Gui.PickedAmmo(e, tag)
@@ -79,7 +89,7 @@ function Gui.PickedAmmo(e, tag)
     local player = game.get_player(e.player_index)
     local ammo = Func.Split(element_name, ":")[2]
 
-    global.players[player.name].ammo[tag] = ammo
+    storage.players[player.name].ammo[tag] = ammo
 end
 
 function Gui.SpawnTweaksTab(e)
@@ -110,38 +120,40 @@ function Gui.PickedGun(e, tag)
     local gun = Func.Split(element_name, ":")[2]
     local frame = player.gui.screen.SpawnTweaksMain.inside_frame.tabbed_pane[tag:lower()].ammo
 
-    global.players[player.name].gun[tag] = gun
+    storage.players[player.name].gun[tag] = gun
     if gun == "None" then
-        global.players[player.name].ammo[tag] = "None"
+        storage.players[player.name].ammo[tag] = "None"
     end
 
     Gui.ProcessRadioButton(e.element)
     frame.clear()
-    if global.players[player.name].ammo[tag] == "None" then
+    if storage.players[player.name].ammo[tag] == "None" then
         state = true
     end
     frame.add { name = "Picked" .. tag .. "Ammo:None", type = "radiobutton", state = state, caption = "None", enabled = true }
 
     if gun ~= "None" then
-        local item = game.item_prototypes[gun]
+        local item = prototypes.item[gun]
         if item.attack_parameters and item.attack_parameters.ammo_categories then
             for _, ammo_category in pairs(item.attack_parameters.ammo_categories) do
-                for k, v in pairs(global.AmmoByCategory[ammo_category]) do
-                    local game_recipes = game.get_filtered_recipe_prototypes({ { filter = "has-product-item", elem_filters = { { filter = "name", name = v.name } } } })
+                for k, v in pairs(storage.AmmoByCategory[ammo_category]) do
+                    local game_recipes = prototypes.get_recipe_filtered({ { filter = "has-product-item", elem_filters = { { filter = "name", name = v.name } } } })
                     local force_recipes = player.force.recipes
                     for _, recipe in pairs(game_recipes) do
-                        if force_recipes[recipe.name].enabled then
-                            if global.players[player.name].ammo[tag] == v.name then
-                                state = true
-                            else
-                                state = false
+                        if recipe.category ~= "recycling" then
+                            if force_recipes[recipe.name].enabled then
+                                if storage.players[player.name].ammo[tag] == v.name then
+                                    state = true
+                                else
+                                    state = false
+                                end
+                                local flag, cost, caption, postfix = Gui.GenerateCaption(player, v.name, v.proto.type)
+                                if not elements[cost] then
+                                    elements[cost] = {}
+                                end
+                                if postfix then caption = caption .. " " .. postfix end
+                                elements[cost][k] = { name = "Picked" .. tag .. "Ammo:" .. v.name, type = "radiobutton", state = state, caption = caption, enabled = flag }
                             end
-                            local flag, cost, caption, postfix = Gui.GenerateCaption(player, v.name, v.proto.type)
-                            if not elements[cost] then
-                                elements[cost] = {}
-                            end
-                            if postfix then caption = caption .. " " .. postfix end
-                            elements[cost][k] = { name = "Picked" .. tag .. "Ammo:" .. v.name, type = "radiobutton", state = state, caption = caption, enabled = flag }
                         end
                     end
                 end
@@ -151,7 +163,7 @@ function Gui.PickedGun(e, tag)
     for _, k1 in pairs(Func.sortKeys(elements)) do
         for _, k2 in pairs(Func.sortKeys(elements[k1])) do
             local v = elements[k1][k2]
-            if global.gear["ammo"][Func.Split(v.name, ":")[2]].enabled then
+            if storage.gear["ammo"][Func.Split(v.name, ":")[2]].enabled then
                 local element = frame.add(elements[k1][k2])
                 if element.state then
                     local data = { player_index = player.index, element = element }
@@ -180,8 +192,8 @@ function Gui.CreateGunFrame(frame, tag, alt)
     frame1.style.vertically_stretchable = true
     frame1.style.minimal_width = 200
 
-    if global.players[player.name].gun[tag] == "None" then
-        global.players[player.name].ammo[tag] = "None"
+    if storage.players[player.name].gun[tag] == "None" then
+        storage.players[player.name].ammo[tag] = "None"
         state = true
     end
 
@@ -191,22 +203,22 @@ function Gui.CreateGunFrame(frame, tag, alt)
     frame2.style.minimal_width = 200
 
     frame1.add { name = "Picked" .. tag .. "Gun:None", type = "radiobutton", state = state, caption = "None", enabled = true }
-    local items = game.get_filtered_item_prototypes({ { filter = "type", type = "gun" } })
+    local items = prototypes.get_item_filtered({ { filter = "type", type = "gun" } })
     for k, v in pairs(items) do
         if v.flags and v.flags.hidden then
             -- skip
         else
-            local game_recipes = game.get_filtered_recipe_prototypes({ { filter = "has-product-item", elem_filters = { { filter = "name", name = v.name } } } })
+            local game_recipes = prototypes.get_recipe_filtered({ { filter = "has-product-item", elem_filters = { { filter = "name", name = v.name } } } })
             local force_recipes = player.force.recipes
             for _, recipe in pairs(game_recipes) do
-                if force_recipes[recipe.name].enabled then
-                    if global.players[player.name].gun[tag] == k then
+                if k == "pistol" or (force_recipes[recipe.name].enabled and not (force_recipes[recipe.name].hidden)) then
+                    if storage.players[player.name].gun[tag] == k then
                         state = true
                     else
                         state = false
                     end
                     local flag, cost, caption, postfix = Gui.GenerateCaption(player, v.name, v.type)
-                    if global.players[player.name].gun[alt] == v.name then
+                    if storage.players[player.name].gun[alt] == v.name then
                         flag = false
                     end
 
@@ -226,7 +238,7 @@ function Gui.CreateGunFrame(frame, tag, alt)
     end
     for _, k1 in pairs(Func.sortKeys(elements)) do
         local v = elements[k1]
-        if global.gear["gun"][Func.Split(v.name, ":")[2]].enabled then
+        if storage.gear["gun"][Func.Split(v.name, ":")[2]].enabled then
             local element = frame1.add(elements[k1])
             if element.state then
                 local data = { player_index = player.index, element = element }
@@ -246,9 +258,9 @@ end
 
 function Gui.CreateData(player, item_type)
     local elements = {}
-    -- local items = game.get_filtered_item_prototypes({ { filter = "type", type = item_type:lower() } })
-    for k, v in pairs(global.gear[item_type:lower()]) do
-        if global.players[player.name][item_type:lower()] == v.prototype.name then
+    -- local items = prototypes.get_item_filtered({ { filter = "type", type = item_type:lower() } })
+    for k, v in pairs(storage.gear[item_type:lower()]) do
+        if storage.players[player.name][item_type:lower()] == v.prototype.name then
             state = true
         else
             state = false
@@ -256,16 +268,24 @@ function Gui.CreateData(player, item_type)
         if v.prototype and v.prototype.flags and v.prototype.flags.hidden then
             -- skip
         else
-            local game_recipes = game.get_filtered_recipe_prototypes({ { filter = "has-product-item", elem_filters = { { filter = "name", name = v.prototype.name } } } })
+            local game_recipes = prototypes.get_recipe_filtered({ { filter = "has-product-item", elem_filters = { { filter = "name", name = v.prototype.name } } } })
             local force_recipes = player.force.recipes
             if #game_recipes > 0 then
                 for _, recipe in pairs(game_recipes) do
-                    local flag, cost, caption, postfix = Gui.GenerateCaption(player, v.prototype.name, v.prototype.type)
-                    local key = ""
-                    if v.prototype.subgroup and v.prototype.subgroup.name then key = key .. v.prototype.subgroup.name end
-                    if v.prototype.order then key = key .. v.prototype.order end
-                    key = key .. v.prototype.name
-                    elements[key] = { name = v.prototype.name, type = v.prototype.type, state = state, caption = caption, postfix = postfix, enabled = flag, unlocked = force_recipes[recipe.name].enabled }
+                    if recipe.category ~= "recycling" then
+                        local flag, cost, caption, postfix = Gui.GenerateCaption(player, v.prototype.name, v.prototype.type)
+                        local key = ""
+                        if v.prototype.subgroup and v.prototype.subgroup.name then key = key .. v.prototype.subgroup.name end
+                        if v.prototype.order then key = key .. v.prototype.order end
+                        key = key .. v.prototype.name
+                        local unlocked = force_recipes[recipe.name].enabled
+                        if v.prototype.name == 'pistol' then
+                            unlocked = true
+                            state = true
+                            flag = true
+                        end
+                        elements[key] = { name = v.prototype.name, type = v.prototype.type, state = state, caption = caption, postfix = postfix, enabled = flag, unlocked = unlocked }
+                    end
                 end
             else
                 local key = ""
@@ -283,7 +303,7 @@ function Gui.CreateRadioButtonList(frame, item_type)
     local state = false
     local player = game.get_player(frame.player_index)
 
-    if global.players[player.name][item_type] == "None" then
+    if storage.players[player.name][item_type] == "None" then
         state = true
     end
     frame.add { name = "Picked:" .. item_type .. ":None", type = "radiobutton", state = state, caption = "None", enabled = true }
@@ -293,14 +313,14 @@ function Gui.CreateRadioButtonList(frame, item_type)
     for _, k1 in pairs(Func.sortKeys(elements)) do
         local v = elements[k1]
         local v_type
-        if global.gear[v.type] and global.gear[v.type][v.name] then
+        if storage.gear[v.type] and storage.gear[v.type][v.name] then
             v_type = v.type
         else
             v_type = "capsule"
         end
         if v.postfix then v.caption = v.caption .. " " .. v.postfix end
         local element = { name = "Picked:" .. item_type .. ":" .. v.name, type = "radiobutton", state = v.state, caption = v.caption, enabled = v.enabled }
-        if v.unlocked and global.gear[v_type][v.name].enabled then
+        if v.unlocked and storage.gear[v_type][v.name].enabled then
             frame.add(element)
         end
     end
@@ -315,8 +335,8 @@ function Gui.CreateAdmin(frame)
             local new_tab = tabbed_pane.add({ type = "tab", style = "tab", name = "SpawnTweaksTab:" .. name, caption = Func.CapitalizeWord(data.caption) })
             local new_frame = tabbed_pane.add({ type = "frame", style = "invisible_frame", name = name, direction = data.direction })
             tabbed_pane.add_tab(new_tab, new_frame)
-            global.players[player.name].frames[new_tab.name] = new_tab
-            global.players[player.name].frames[new_frame.name] = new_frame
+            storage.players[player.name].frames[new_tab.name] = new_tab
+            storage.players[player.name].frames[new_frame.name] = new_frame
             data.func(new_frame, data.caption)
         end
     end
@@ -351,9 +371,9 @@ function Gui.CreateSpawnTweaksMain(player)
     pusher.style.vertically_stretchable = true
     pusher.style.horizontally_stretchable = true
     pusher.drag_target = main_frame
-    flowtitle.add { type = "sprite-button", style = "frame_action_button", name = "SpawnTweaksMainClose", sprite = "utility/close_white" }
+    flowtitle.add { type = "sprite-button", style = "frame_action_button", name = "SpawnTweaksMainClose", sprite = "utility/close" }
 
-    local inside_frame = main_frame.add({ type = "frame", name = "inside_frame", style = "inside_deep_frame_for_tabs" })
+    local inside_frame = main_frame.add({ type = "frame", name = "inside_frame", style = "universe_frame" })
 
     local tabbed_pane = inside_frame.add({ type = "tabbed-pane", name = "tabbed_pane", style = "tabbed_pane_with_no_side_padding" })
 
@@ -362,8 +382,8 @@ function Gui.CreateSpawnTweaksMain(player)
             local tab = tabbed_pane.add({ type = "tab", style = "tab", name = "SpawnTweaksTab:" .. name, caption = Func.CapitalizeWord(name) })
             local frame = tabbed_pane.add({ type = "frame", style = "invisible_frame", name = name, direction = data.direction })
             tabbed_pane.add_tab(tab, frame)
-            global.players[player.name].frames[tab.name] = tab
-            global.players[player.name].frames[frame.name] = tab
+            storage.players[player.name].frames[tab.name] = tab
+            storage.players[player.name].frames[frame.name] = tab
             data.func(frame)
         end
     end
@@ -436,7 +456,7 @@ function Gui.OnGuiEvent(e)
     local element_name = e.element.name
     local method = Func.Split(element_name, ":")[1]
 
-    if global.gui_locked then return end
+    if storage.gui_locked then return end
 
     if Gui.events[method] then
         Gui.events[method](e)
@@ -447,20 +467,21 @@ function Gui.CreateAdminTab(frame, item_data)
     local player = game.get_player(frame.player_index)
 
     local frame0 = frame.add({ type = "frame", style = "inside_shallow_frame_with_padding", direction = "vertical" })
-    frame0.style.horizontally_stretchable = "on"
+    frame0.style.horizontally_stretchable = true
     frame0.style.vertically_stretchable = true
     frame0.style.minimal_width = 300
     frame0.style.minimal_height = 400
     local frame1 = frame0.add({ type = "scroll-pane", style = "naked_scroll_pane", direction = "vertical" })
-    frame1.style.horizontally_stretchable = "on"
-    frame1.style.vertically_stretchable = "on"
+    frame1.style.horizontally_stretchable = true
+    frame1.style.vertically_stretchable = true
     frame1.style.minimal_width = 300
 
     local column_count = 3
     if item_data == "Ammo" or item_data == "Capsule" then column_count = 4 end
 
     local flow = frame1.add({ type = "table", column_count = column_count })
-    flow.style.vertically_stretchable = "on"
+    flow.style.vertically_stretchable = true
+    flow.style.vertically_stretchable = true
 
     if item_data == "Ammo" or item_data == "Capsule" then flow.add({ type = "label", caption = "Qty" }) end
     flow.add({ type = "label", caption = "Cost" })
@@ -471,23 +492,23 @@ function Gui.CreateAdminTab(frame, item_data)
     for _, k1 in pairs(Func.sortKeys(items)) do
         local item = items[k1]
         local i_type
-        if global.gear[item.type] and global.gear[item.type][item.name] then
+        if storage.gear[item.type] and storage.gear[item.type][item.name] then
             i_type = item.type
-        elseif global.gear["capsule"] and global.gear["capsule"][item.name] then
+        elseif storage.gear["capsule"] and storage.gear["capsule"][item.name] then
             i_type = "capsule"
         end
 
         if item_data == "Ammo" or item_data == "Capsule" then
-            local quantity = global.gear[i_type][item.name].quantity
+            local quantity = storage.gear[i_type][item.name].quantity
             v = flow.add({ name = "Quantity:" .. item_data .. ":" .. item.name, type = "textfield", numeric = true, allow_negative = false, allow_decimal = false, text = quantity })
             v.style.maximal_width = 50
         end
 
-        local cost = global.gear[i_type][item.name].cost
+        local cost = storage.gear[i_type][item.name].cost
         v = flow.add({ name = "Cost:" .. item_data .. ":" .. item.name, type = "textfield", numeric = true, allow_negative = false, allow_decimal = false, text = cost })
         v.style.maximal_width = 50
 
-        flow.add({ name = "Enabled:" .. item_data .. ":" .. item.name, type = "checkbox", state = global.gear[i_type][item.name].enabled, enabled = true })
+        flow.add({ name = "Enabled:" .. item_data .. ":" .. item.name, type = "checkbox", state = storage.gear[i_type][item.name].enabled, enabled = true })
         flow.add({ type = "label", caption = item.caption })
     end
 end

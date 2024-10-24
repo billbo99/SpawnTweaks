@@ -4,8 +4,8 @@ local global_data = require("scripts.global-data")
 local player_data = require("scripts.player-data")
 
 local function GetTranslations()
-    global.locale_dictionaries = remote.call("Babelfish", "get_translations")
-    global.gui_locked = false
+    storage.locale_dictionaries = remote.call("Babelfish", "get_translations")
+    storage.gui_locked = false
 end
 
 local function RegisterEvents()
@@ -36,7 +36,7 @@ end
 ---@param event ConfigurationChangedData
 local function OnConfigurationChanged(event)
     RegisterEvents()
-    global.gui_locked = true
+    storage.gui_locked = true
 
     DB.OnConfigurationChanged(event)
     global_data.OnConfigurationChanged(event)
@@ -52,7 +52,7 @@ local function OnPlayerCreated(event)
     local player = game.get_player(event.player_index)
     if player then
         player_data.init(player)
-        player.print(settings.global["SpawnTweaks-welcome"].value, global.print_colour)
+        player.print(settings.global["SpawnTweaks-welcome"].value, storage.print_colour)
         player_data.GiveGear(player)
         Gui.create(player)
     end
@@ -63,7 +63,7 @@ local function OnPlayerJoinedGame(event)
     local player = game.get_player(event.player_index)
     if player then
         Gui.create(player)
-        if not global.players[player.name] then
+        if not storage.players[player.name] then
             player_data.init(player)
         end
     end
@@ -78,7 +78,7 @@ end
 ---@param event EventData.on_player_removed
 local function OnPlayerRemoved(event)
     local player = game.get_player(event.player_index)
-    if player then global.players[player.name] = nil end
+    if player then storage.players[player.name] = nil end
 end
 
 ---@param event EventData.on_gui_text_changed
@@ -116,7 +116,7 @@ local function OnPlayerRespawned(event)
     local player = game.get_player(event.player_index)
     if player then
         player_data.GiveGear(player)
-        player.print(settings.global["SpawnTweaks-respawn"].value, global.print_colour)
+        player.print(settings.global["SpawnTweaks-respawn"].value, storage.print_colour)
     end
 end
 
