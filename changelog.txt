@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.0.2
+Date: 2025-11-02
+  Changes:
+    - Allow the override of starting ammo packs, for mods that don't use standard ammo pack names.
+---------------------------------------------------------------------------------------------------
 Version: 2.0.1
 Date: 2024-10-24
   Changes:

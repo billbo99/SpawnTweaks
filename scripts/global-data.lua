@@ -57,8 +57,9 @@ function global_data.parse_gear(action)
     global_data.find_gear_by_type("gun")
     global_data.find_gear_by_type("armor")
 
+    local ammo = settings.global['SpawnTweaks-starting-ammo'].value
     storage.gear['gun']['pistol'].cost = 0
-    storage.gear['ammo']['firearm-magazine'].cost = 0
+    storage.gear['ammo'][ammo].cost = 0
 
     if action == "init" then
         storage.gear['ammo']['cannon-shell'].enabled = false

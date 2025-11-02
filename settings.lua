@@ -2,6 +2,7 @@ data:extend(
     {
         -- runtime-global
         { name = "SpawnTweaks-get-starting-gear",       type = "bool-setting",   default_value = true,                                   setting_type = "runtime-global", order = "0010" },
+        { name = "SpawnTweaks-starting-ammo",           type = "string-setting", default_value = "firearm-magazine",                     setting_type = "runtime-global", order = "0015" },
         { name = "SpawnTweaks-extra-respawn-gear",      type = "string-setting", default_value = "",                                     allow_blank = true,              setting_type = "runtime-global", order = "0020" },
         { name = "SpawnTweaks-gun_base_multiplyer",     type = "int-setting",    default_value = 15,                                     minimum_value = 0, setting_type = "runtime-global", order = "0100" },
         { name = "SpawnTweaks-ammo_base_multiplyer",    type = "int-setting",    default_value = 50,                                     minimum_value = 0, setting_type = "runtime-global", order = "0150" },

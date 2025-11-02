@@ -4,6 +4,7 @@ local player_data = {}
 
 function player_data.init(player)
     if player then
+        local _ammo = settings.global['SpawnTweaks-starting-ammo'].value
         local data = {
             flags = {
                 can_open_gui = false,
@@ -12,7 +13,7 @@ function player_data.init(player)
                 translate_on_join = true
             },
             gun = { Primary = "pistol", Secondary = "None" },
-            ammo = { Primary = "firearm-magazine", Secondary = "None" },
+            ammo = { Primary = _ammo, Secondary = "None" },
             capsule = "None",
             armor = "None",
             gui = {},
@@ -42,7 +43,7 @@ function player_data.validate(player)
         end
 
         if storage.players[player.name].ammo.Primary and not storage.gear.ammo[storage.players[player.name].ammo.Primary] then
-            storage.players[player.name].ammo.Primary = "firearm-magazine"
+            storage.players[player.name].ammo.Primary = settings.global['SpawnTweaks-starting-ammo'].value or "firearm-magazine"
         end
 
         if storage.players[player.name].ammo.Secondary and not storage.gear.ammo[storage.players[player.name].ammo.Secondary] then
@@ -56,18 +57,8 @@ function player_data.validate(player)
         if storage.players[player.name].armor and not storage.gear.armor[storage.players[player.name].armor] then
             storage.players[player.name].armor = "None"
         end
-        -- else
-        --     player_data.init(player)
     end
 
-    --     gun = { Primary = "pistol", Secondary = "None" },
-    --     ammo = { Primary = "firearm-magazine", Secondary = "None" },
-    --     capsule = "None",
-    --     armor = "None",
-    --     gui = {},
-    --     settings = {},
-    --     frames = {},
-    -- }
 end
 
 function player_data.ClearPlayerInventories(player)
